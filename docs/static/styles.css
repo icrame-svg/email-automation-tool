@@ -1,0 +1,189 @@
+/* Custom styles for Conference Bulk Email System (copied for GitHub Pages static preview) */
+
+.bg-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+}
+
+.card {
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%) !important;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #224abe 0%, #4e73df 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(78, 115, 223, 0.3);
+}
+
+.btn-primary:disabled {
+    background: #6c757d;
+    transform: none;
+}
+
+.file-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.8);
+}
+
+.file-upload-area:hover,
+.file-upload-area.dragover {
+    border-color: #4e73df;
+    background: rgba(78, 115, 223, 0.05);
+    transform: scale(1.02);
+}
+
+.upload-placeholder i {
+    transition: all 0.3s ease;
+}
+
+.file-upload-area:hover .upload-placeholder i {
+    transform: scale(1.1);
+    color: #4e73df !important;
+}
+
+.form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+}
+
+.form-control-lg {
+    padding: 16px 20px;
+    font-size: 1.1rem;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.alert {
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+    color: #155724;
+}
+
+.alert-danger {
+    background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+    color: #721c24;
+}
+
+.spinner-border {
+    animation: spinner-border 0.75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.text-muted {
+    color: #6c757d !important;
+}
+
+.opacity-75 {
+    opacity: 0.75;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem 1.5rem !important;
+    }
+
+    .btn-lg {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+
+    .fa-2x {
+        font-size: 1.5rem !important;
+    }
+}
+
+/* Data Preview Styles */
+.table-responsive {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.table th {
+    position: sticky;
+    top: 0;
+    background-color: #343a40;
+    z-index: 10;
+}
+
+.table td {
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card.border-info {
+    border-color: #0dcaf0 !important;
+}
+
+.card-header.bg-info {
+    background: linear-gradient(135deg, #0dcaf0 0%, #17a2b8 100%) !important;
+}
+
+/* Enhanced file upload feedback */
+.file-upload-area.dragover {
+    border-color: #0dcaf0;
+    background: rgba(13, 202, 240, 0.05);
+    transform: scale(1.02);
+}
+
+/* Loading state improvements */
+#sendBtn:disabled {
+    opacity: 0.7;
+}
+
+#sendBtn:disabled i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

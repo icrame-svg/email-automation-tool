@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Email Sender - Conference Management System (Static Preview)</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <div class="container-fluid bg-gradient">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-lg-8 col-xl-6">
+                <div class="alert alert-warning mt-3" role="alert">
+                    <strong>Static preview:</strong> This copy is hosted as a static site for UI testing only. Backend features (file preview via `/preview_data`, sending emails) require running the Flask server locally or hosting the backend. See the README for instructions.
+                </div>
+
+                <div class="card shadow-lg border-0 rounded-4">
+                    <div class="card-header bg-primary text-white text-center py-4 rounded-top-4">
+                        <i class="fas fa-envelope-bulk fa-2x mb-2"></i>
+                        <h2 class="mb-0">Conference Bulk Email System</h2>
+                        <p class="mb-0 opacity-75">Send personalized emails to attendees (static preview)</p>
+                    </div>
+                    <div class="card-body p-5">
+                        <form id="emailForm" enctype="multipart/form-data">
+                            <!-- File Upload Section -->
+                            <div class="upload-section mb-4">
+                                <label for="file" class="form-label fw-bold">
+                                    <i class="fas fa-file-excel text-success me-2"></i>Excel File Upload
+                                </label>
+                                <div class="file-upload-area" id="fileUploadArea">
+                                    <input type="file" class="form-control d-none" id="file" name="file" accept=".xlsx,.xls" required>
+                                    <div class="upload-placeholder text-center p-4">
+                                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                        <p class="mb-2">Drag & drop your Excel file here or click to browse</p>
+                                        <small class="text-muted">Supported formats: .xlsx, .xls</small>
+                                        <br>
+                                        <small class="text-muted mt-1 d-block">Expected columns: Name, Email (case-insensitive)</small>
+                                    </div>
+                                </div>
+                                <div class="file-info mt-2 d-none" id="fileInfo">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    <span id="fileName"></span>
+                                </div>
+                            </div>
+
+                            <!-- Email Subject -->
+                            <div class="mb-4">
+                                <label for="subject" class="form-label fw-bold">
+                                    <i class="fas fa-heading text-primary me-2"></i>Email Subject
+                                </label>
+                                <input type="text" class="form-control form-control-lg" id="subject" name="subject" placeholder="Enter email subject" required>
+                            </div>
+
+                            <!-- Email Body -->
+                            <div class="mb-4">
+                                <label for="body" class="form-label fw-bold">
+                                    <i class="fas fa-edit text-primary me-2"></i>Email Body
+                                </label>
+                                <textarea class="form-control" id="body" name="body" rows="8" placeholder="Compose your email message..." required></textarea>
+                                <div class="form-text">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Use placeholders like <code>{name}</code>, <code>{email}</code>, <code>{reg_id}</code> for personalization
+                                </div>
+                            </div>
+
+                            <!-- Send Button -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg" id="sendBtn">
+                                    <i class="fas fa-paper-plane me-2"></i>Send Emails
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Loading Spinner -->
+                        <div id="loading" class="text-center mt-4 d-none">
+                            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                                <span class="visually-hidden">Sending...</span>
+                            </div>
+                            <h5 class="mt-3 text-primary">Sending emails...</h5>
+                            <p class="text-muted">Please wait while we process your request</p>
+                        </div>
+
+                        <!-- Data Preview Section -->
+                        <div id="dataPreview" class="mt-4 d-none">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <i class="fas fa-table me-2"></i>Data Preview
+                                    <button type="button" class="btn-close btn-close-white float-end" onclick="hideDataPreview()"></button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <strong>Total Records:</strong> <span id="totalRecords" class="text-primary"></span>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Columns Detected:</strong> <span id="columnsDetected" class="text-primary"></span>
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped table-hover" id="dataTable">
+                                            <thead class="table-dark">
+                                                <tr id="tableHeader"></tr>
+                                            </thead>
+                                            <tbody id="tableBody"></tbody>
+                                        </table>
+                                    </div>
+                                    <div class="alert alert-info mt-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Ready to send!</strong> Review the data above. Click "Send Emails" to proceed with bulk emailing.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="text-center mt-4 text-muted">
+                    <small>Conference Management System | Bulk Email Tool</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Small sample fallback data used when the backend is not available (static GitHub Pages)
+        const SAMPLE_PREVIEW_DATA = {
+            columns: ['name','email','reg_id','company','position'],
+            total_records: 4,
+            preview_rows: [
+                {name:'John Doe', email:'john@example.com', reg_id:'CONF-001', company:'ABC Corp', position:'Developer'},
+                {name:'Jane Smith', email:'jane@example.com', reg_id:'CONF-002', company:'XYZ Ltd', position:'Manager'},
+                {name:'Bob Johnson', email:'bob@example.com', reg_id:'CONF-003', company:'Tech Solutions', position:'Analyst'},
+                {name:'Alice Brown', email:'alice@example.com', reg_id:'CONF-004', company:'Innovate Inc', position:'Designer'}
+            ]
+        };
+
+        // File upload drag & drop functionality
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const fileInput = document.getElementById('file');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const uploadPlaceholder = document.querySelector('.upload-placeholder');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            fileUploadArea.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            fileUploadArea.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            fileUploadArea.classList.remove('dragover');
+        }
+
+        fileUploadArea.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateFileInfo(files[0]);
+                previewData(files[0]);
+            }
+        }
+
+        fileUploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateFileInfo(e.target.files[0]);
+                previewData(e.target.files[0]);
+            }
+        });
+
+        function previewData(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch('/preview_data', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Preview error:', data.error);
+                    // Fallback to sample data for static preview
+                    displayDataPreview(SAMPLE_PREVIEW_DATA);
+                    return;
+                }
+
+                displayDataPreview(data);
+            })
+            .catch(error => {
+                console.warn('Backend not available — falling back to sample preview. Error:', error);
+                displayDataPreview(SAMPLE_PREVIEW_DATA);
+            });
+        }
+
+        function displayDataPreview(data) {
+            const dataPreview = document.getElementById('dataPreview');
+            const totalRecords = document.getElementById('totalRecords');
+            const columnsDetected = document.getElementById('columnsDetected');
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            // Update stats
+            totalRecords.textContent = data.total_records;
+            columnsDetected.textContent = data.columns.join(', ');
+
+            // Clear previous content
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // Add headers
+            data.columns.forEach(col => {
+                const th = document.createElement('th');
+                th.textContent = col.charAt(0).toUpperCase() + col.slice(1);
+                tableHeader.appendChild(th);
+            });
+
+            // Add preview rows
+            data.preview_rows.forEach(row => {
+                const tr = document.createElement('tr');
+                data.columns.forEach(col => {
+                    const td = document.createElement('td');
+                    td.textContent = row[col] || '';
+                    tr.appendChild(td);
+                });
+                tableBody.appendChild(tr);
+            });
+
+            // Show preview
+            dataPreview.classList.remove('d-none');
+            dataPreview.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function hideDataPreview() {
+            document.getElementById('dataPreview').classList.add('d-none');
+        }
+
+        function updateFileInfo(file) {
+            fileName.textContent = file.name;
+            fileInfo.classList.remove('d-none');
+            uploadPlaceholder.innerHTML = `
+                <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+                <p class="mb-0">${file.name}</p>
+                <small class="text-muted">${(file.size / 1024).toFixed(1)} KB</small>
+            `;
+        }
+
+        // Form submission: static preview shows an informative message instead of sending
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const sendBtn = document.getElementById('sendBtn');
+            const loading = document.getElementById('loading');
+
+            // Show loading
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+            loading.classList.remove('d-none');
+
+            // Attempt to call backend; if not available, show instructions
+            fetch('/send_emails', {
+                method: 'POST',
+                body: new FormData(this)
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.classList.add('d-none');
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Emails';
+
+                if (data.error) {
+                    alert('Server error: ' + data.error + '\nTo send real emails, run the Flask server locally and configure credentials.');
+                } else {
+                    alert('Sent: ' + data.sent + ' Failed: ' + data.failed);
+                }
+            })
+            .catch(err => {
+                loading.classList.add('d-none');
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fas fa-paper-plane me-2"></i>Send Emails';
+                alert('This static preview cannot send emails. To test sending, run the Flask app locally (`python app.py`) and open the site at http://127.0.0.1:5000/');
+            });
+        });
+    </script>
+</body>
+</html>
